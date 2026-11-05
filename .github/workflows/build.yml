@@ -1,0 +1,158 @@
+name: CI build and test
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  VCPKG_COMMIT_SHA: 29718cfec805208b4e2d80ed91e681143b488dd7 # corresponds 2026.11.05
+  
+jobs:
+  build:
+    name: ${{ matrix.config.name }} (${{ matrix.build_type }})
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      fail-fast: true
+      matrix:
+        config:
+        - {
+            name: "Windows 2022 MSVC 2022",
+            os: windows-2022,
+            cc: "cl",
+            cxx: "cl",
+            generator: "Visual Studio 17 2022"
+          }
+        - {
+            name: "Windows 2025 MSVC 2026",
+            os: windows-2025-vs2026,
+            cc: "cl",
+            cxx: "cl",
+            generator: "Visual Studio 18 2026"
+          }
+        - {
+            name: "Ubuntu 24 GCC 13",
+            os: ubuntu-24.04,
+            cc: "gcc",
+            cxx: "g++",
+            generator: "Ninja"
+          }
+        - {
+            name: "Ubuntu 26 GCC 15",
+            os: ubuntu-26.04,
+            cc: "gcc",
+            cxx: "g++",
+            generator: "Ninja"
+          }
+        - {
+            name: "macOS 26 Xcode 26 (ARM)",
+            os: macos-26,
+            cc: "clang",
+            cxx: "clang++",
+            generator: "Xcode",
+            xcode_version: "26.6"
+          }
+        build_type: [Debug, Release]
+
+    steps:
+    - uses: actions/checkout@v7.0.1
+
+    - name: Set vcpkg environment (Unix)
+      if: "!startsWith(runner.os, 'Windows')"
+      run: |
+        echo "VCPKG_DIR=${{ runner.temp }}/vcpkg" >> $GITHUB_ENV
+        echo "VCPKG_ROOT=${{ runner.temp }}/vcpkg" >> $GITHUB_ENV
+        echo "VCPKG_BINARY_SOURCES=clear;files,${{ runner.temp }}/vcpkg-cache,readwrite" >> $GITHUB_ENV
+
+    - name: Set vcpkg environmentg (Windows)
+      if: startsWith(runner.os, 'Windows')
+      shell: pwsh
+      run: |
+        echo "VCPKG_DIR=${{ runner.temp }}/vcpkg" >> $env:GITHUB_ENV
+        echo "VCPKG_ROOT=${{ runner.temp }}/vcpkg" >> $env:GITHUB_ENV
+        echo "VCPKG_BINARY_SOURCES=clear;files,${{ runner.temp }}/vcpkg-cache,readwrite" >> $env:GITHUB_ENV
+
+    - name: Set up binary cache
+      uses: actions/cache@v6.1.0
+      with:
+        path: ${{ runner.temp }}/vcpkg-cache
+        key: vcpkg-cache-${{ runner.os }}-${{ matrix.os }}-${{ matrix.build-cversion }}-${{ env.VCPKG_COMMIT_SHA }}-${{ hashFiles('**/vcpkg.json', '**/vcpkg-overlays/**') }}
+        restore-keys: |
+          vcpkg-cache-${{ runner.os }}-${{ matrix.os }}-${{ matrix.build-cversion }}-${{ env.VCPKG_COMMIT_SHA }}
+
+    - name: Clone and checkout vcpkg
+      run: |
+        git clone https://github.com/microsoft/vcpkg.git --branch master ${{ env.VCPKG_DIR }}
+        git -C ${{ env.VCPKG_DIR }} checkout ${{ env.VCPKG_COMMIT_SHA }}
+
+    - name: Bootstrap vcpkg (Unix)
+      if: "!startsWith(runner.os, 'Windows')"
+      run: ${{ env.VCPKG_DIR }}/bootstrap-vcpkg.sh -disableMetrics
+
+    - name: Bootstrap vcpkg (Windows)
+      if: startsWith(runner.os, 'Windows')
+      shell: pwsh
+      run: ${{ env.VCPKG_DIR }}/bootstrap-vcpkg.bat -disableMetrics
+      
+    # Install system dependencies
+    - name: Install system dependencies (MacOS)
+      if: runner.os == 'macOS'
+      shell: bash
+      run: brew install libomp
+
+    # Configure project
+    - name: Configure projects (Windows)
+      if: runner.os == 'Windows'
+      shell: pwsh
+      env:
+        CC: ${{ matrix.config.cc }}
+        CXX: ${{ matrix.config.cxx }}
+        CMAKE_TOOLCHAIN_FILE: "${{ env.VCPKG_ROOT }}/scripts/buildsystems/vcpkg.cmake"
+      run: |
+        cmake -B ${{github.workspace}}/build  -G "${{ matrix.config.generator }}" -DCMAKE_BUILD_TYPE=${{matrix.build_type }} -DCELLCLUSTERING_BUILD_TESTS=ON -DCELLCLUSTERING_BUILD_EXAMPLES=ON -A x64 
+
+    - name: Configure projects (Linux)
+      if: runner.os == 'Linux'
+      shell: bash
+      env:
+        CC: ${{ matrix.config.cc }}
+        CXX: ${{ matrix.config.cxx }}
+        CMAKE_TOOLCHAIN_FILE: "${{ env.VCPKG_ROOT }}/scripts/buildsystems/vcpkg.cmake"
+      run: |
+        cmake -B ${{github.workspace}}/build \
+              -G "${{ matrix.config.generator }}" \
+              -DCMAKE_BUILD_TYPE=${{matrix.build_type }} \
+              -DCELLCLUSTERING_BUILD_TESTS=ON \
+              -DCELLCLUSTERING_BUILD_EXAMPLES=ON
+
+    - name: Configure projects (MacOS)
+      if: runner.os == 'macOS'
+      shell: bash
+      env:
+        CC: ${{ matrix.config.cc }}
+        CXX: ${{ matrix.config.cxx }}
+        CMAKE_TOOLCHAIN_FILE: "${{ env.VCPKG_ROOT }}/scripts/buildsystems/vcpkg.cmake"
+      run: |
+        export OpenMP_ROOT=$(brew --prefix)/opt/libomp
+        sudo xcode-select --switch /Applications/Xcode_${{ matrix.config.xcode_version }}.app/Contents/Developer
+        xcode-select --print-path
+        cmake -B ${{github.workspace}}/build \
+              -G "${{ matrix.config.generator }}" \
+              -DCMAKE_BUILD_TYPE=${{matrix.build_type }} \
+              -DCELLCLUSTERING_BUILD_TESTS=ON \
+              -DCELLCLUSTERING_BUILD_EXAMPLES=ON
+
+    # Build the project
+    - name: Build (Lib)
+      run: cmake --build ${{github.workspace}}/build --target CellClustering --config ${{matrix.build_type }}
+
+    - name: Build (Examples)
+      run: cmake --build ${{github.workspace}}/build --target CellClusteringExampleBlobs --config ${{matrix.build_type }}
+
+    - name: Build (Test)
+      run: cmake --build ${{github.workspace}}/build --target CellClusteringTests --config ${{matrix.build_type }}
+
+    # Run tests
+    - name: Run tests
+      run: ctest --test-dir ${{github.workspace}}/build --build-config ${{ matrix.build_type }} --verbose

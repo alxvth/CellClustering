@@ -1,0 +1,81 @@
+{
+  "name": "cellclustering",
+  "version": "0.1.0",
+  "description": "Cell clustering algorithms",
+  "builtin-baseline": "29718cfec805208b4e2d80ed91e681143b488dd7",
+  "dependencies": [
+    "boost-graph",
+    "knncolle",
+    "knncolle-annoy",
+    "knncolle-kmknn",
+    "knncolle-hnsw"
+  ],
+  "features": {
+    "tests": {
+      "description": "Dependencies for the test suite",
+      "dependencies": [ 
+        "catch2"
+      ]
+    },
+    "examples": {
+      "description": "Dependencies for the examples",
+      "dependencies": [ 
+        "stb"
+      ]
+    }
+  },
+  "overrides": [
+    {
+        "name": "annoy",
+        "version": "1.17.3#0"
+    },
+    {
+        "name": "boost",
+        "version": "1.92.0#0"
+    },    
+    {
+        "name": "catch2",
+        "version": "3.16.1#0"
+    },
+    {
+        "name": "hnswlib",
+        "version": "0.9.0#0"
+    },
+    {
+        "name": "knncolle",
+        "version": "3.1.1#0"
+    },
+    {
+        "name": "knncolle-annoy",
+        "version": "0.3.0#1"
+    },
+    {
+        "name": "knncolle-kmknn",
+        "version": "0.2.0#1"
+    },
+    {
+        "name": "knncolle-hnsw",
+        "version": "0.3.2#1"
+    },
+    {
+        "name": "ltla-aarand",
+        "version": "1.1.0#0"
+    },
+    {
+        "name": "ltla-cppkmeans",
+        "version": "4.0.6#0"
+    },
+    {
+        "name": "ltla-sanisizer",
+        "version": "0.2.2#0"
+    },
+    {
+        "name": "ltla-subpar",
+        "version": "0.5.0#1"
+    },
+    {
+        "name": "stb",
+        "version": "2026-08-02#0"
+    }
+  ]
+}

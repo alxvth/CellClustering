@@ -1,0 +1,16 @@
+BasedOnStyle: LLVM
+
+# AccessModifierOffset: -2
+AccessModifierOffset: -4
+# AllowShortFunctionsOnASingleLine: All
+AllowShortFunctionsOnASingleLine: Empty
+# ColumnLimit: 80
+ColumnLimit: 120
+# IndentWidth: 2
+IndentWidth: 4
+# NamespaceIndentation: None
+NamespaceIndentation: All
+# PointerAlignment: Right
+PointerAlignment: Left
+# TabWidth: 8
+TabWidth: 4
