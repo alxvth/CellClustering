@@ -1,8 +1,6 @@
 @PACKAGE_INIT@
 include(CMakeFindDependencyMacro)
 find_dependency(Boost CONFIG)
-find_dependency(hnswlib CONFIG)
-find_dependency(Annoy CONFIG)
-find_dependency(Threads)
+find_dependency(OpenMP CONFIG)
 include("${CMAKE_CURRENT_LIST_DIR}/CellClusteringTargets.cmake")
-check_required_components(cellclustering)
+check_required_components(CellClustering)
