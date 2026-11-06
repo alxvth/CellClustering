@@ -25,6 +25,13 @@ target_link_libraries(CellClusteringTests
         knncolle::knncolle_kmknn
 )
 
+add_custom_command(TARGET CellClusteringTests POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different
+          $<TARGET_RUNTIME_DLLS:CellClusteringTests>
+          $<TARGET_FILE_DIR:CellClusteringTests>
+  COMMAND_EXPAND_LISTS
+)
+
 include(CTest)
 include(Catch)
 catch_discover_tests(CellClusteringTests)

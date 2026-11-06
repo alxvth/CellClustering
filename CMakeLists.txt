@@ -4,6 +4,7 @@ cmake_minimum_required(VERSION 3.31)
 # User Options
 # -----------------------------------------------------------------------------
 
+option(CELLCLUSTERING_BUILD_SHARED_LIBS "Build using shared libraries" ON)
 option(CELLCLUSTERING_BUILD_TESTS "Build the Catch2 test suite" OFF)
 option(CELLCLUSTERING_BUILD_EXAMPLES "Build the example program" OFF)
 option(CELLCLUSTERING_INSTALL "Generate install rules" OFF)
@@ -44,7 +45,12 @@ find_package(Threads REQUIRED)
 # Library target
 # -----------------------------------------------------------------------------
 
-add_library(CellClustering)
+if(CELLCLUSTERING_BUILD_SHARED_LIBS)
+  add_library(CellClustering SHARED ${sources})
+else()
+  add_library(CellClustering STATIC ${sources})
+endif()
+
 add_library(CellClustering::CellClustering ALIAS CellClustering)
 
 set(CELLCLUSTERING_SOURCES
@@ -105,6 +111,11 @@ target_link_libraries(CellClustering
         knncolle::knncolle_kmknn
         OpenMP::OpenMP_CXX
         Threads::Threads
+)
+
+set_target_properties(CellClustering PROPERTIES
+  POSITION_INDEPENDENT_CODE ON
+  WINDOWS_EXPORT_ALL_SYMBOLS ON
 )
 
 if(MSVC)
