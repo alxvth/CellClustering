@@ -25,8 +25,8 @@ namespace cellclustering {
         LouvainResult best;
         const auto& params = opt.louvainParams;
 
-         // modularity is undefined; every vertex is alone
-         if (boost::num_edges(graph) == 0) {
+        // modularity is undefined; every vertex is alone
+        if (boost::num_edges(graph) == 0) {
             best.communities.resize(n);
             for (std::size_t i = 0; i < n; ++i)
                 best.communities[i] = i;
@@ -41,8 +41,7 @@ namespace cellclustering {
         int run = 0, updated = 0;
         auto elapsed = [&] { return std::chrono::duration<double>(clock::now() - tic).count(); };
         // The first run is unconditional so a result always exists.
-        while (run == 0 ||
-               (run - updated < params.patience && run < params.maxRuns && elapsed() < params.timeLimit)) {
+        while (run == 0 || (run - updated < params.patience && run < params.maxRuns && elapsed() < params.timeLimit)) {
             std::mt19937_64 gen(master());
             auto cmap = boost::make_iterator_property_map(comm.begin(), boost::get(boost::vertex_index, graph));
             double q = boost::louvain_clustering(graph, cmap, weights, gen, boost::newman_and_girvan{}, kMinImprovement,

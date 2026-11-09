@@ -68,11 +68,11 @@ namespace cellclustering {
             res.communities = sortBySize(lr.communities, opt.minClusterSize);
             res.Q = lr.Q;
         }
-        
+
         if (opt.returnGraph) {
             res.graph = std::move(graph);
         }
-        
+
         return res;
     }
 

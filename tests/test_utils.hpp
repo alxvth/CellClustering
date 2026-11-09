@@ -38,7 +38,6 @@ namespace cellclustering::test {
         14, 19, 15, 17, 28, 4,  22, 3,  6,  23, 4,  23, 21, 3,  2,  2,  4,  22, 5,  0,  7,  10, 11, 13, 26,
         9,  26, 13, 12, 11, 13, 25, 12, 11, 9,  16, 29, 28, 15, 14, 15, 17, 14, 18, 20, 16, 14, 27, 15, 28};
 
-
     inline const std::vector<IndexType> affinityRow = {
         0,  0,  0,  0,  0,  1,  1,  1,  1,  1,  2,  2,  2,  2,  2,  3,  3,  3,  3,  3,  4,  4,  4,  4,  4,
         5,  5,  5,  5,  5,  6,  6,  6,  6,  6,  7,  7,  7,  7,  7,  8,  8,  8,  8,  8,  9,  9,  9,  9,  9,
@@ -85,7 +84,7 @@ namespace cellclustering::test {
             knn.neighborList[i].reserve(knn.k);
 
             for (size_t j = 0; j < knn.k; ++j)
-                knn.neighborList[i].emplace_back(knnMatrix[i * knn.k +j], 0.0f);
+                knn.neighborList[i].emplace_back(knnMatrix[i * knn.k + j], 0.0f);
         }
         return knn;
     }
@@ -117,8 +116,7 @@ namespace cellclustering::test {
     }
 
     /// True if A and B describe the same partition (labels may be permuted)
-    template <typename T> 
-    bool samePartition(const std::vector<T>& a, const std::vector<T>& b) {
+    template <typename T> bool samePartition(const std::vector<T>& a, const std::vector<T>& b) {
         if (a.size() != b.size())
             return false;
         std::map<T, T> ab, ba;
@@ -137,8 +135,7 @@ namespace cellclustering::test {
         return opt;
     }
 
-    template <typename T>
-    std::size_t nDistinct(const std::vector<T>& c) {
+    template <typename T> std::size_t nDistinct(const std::vector<T>& c) {
         return std::set<T>(c.begin(), c.end()).size();
     }
 

@@ -45,7 +45,8 @@ namespace {
     }
 
     // Order-independent comparison (parallel edges are allowed, so compare sorted lists).
-    void requireSameEdges(const std::vector<WEdge>& actual, const std::vector<WEdge>& expected, const double margin = 1e-9) {
+    void requireSameEdges(const std::vector<WEdge>& actual, const std::vector<WEdge>& expected,
+                          const double margin = 1e-9) {
         const auto a = sorted(actual);
         const auto e = sorted(expected);
         REQUIRE(a.size() == e.size());

@@ -193,11 +193,11 @@ TEST_CASE("gaussianKernel: one edge per kNN entry with the expected weight", "[g
         const BGraph g = gaussianKernel(knn, sigma);
         CHECK(boost::num_vertices(g) == 3);
         requireEdges(allEdgesOf(g), {{0, 1, gauss(0.0, sigma)},
-                                  {0, 2, gauss(1.0, sigma)},
-                                  {1, 0, gauss(0.5, sigma)},
-                                  {1, 2, gauss(2.0, sigma)},
-                                  {2, 0, gauss(3.0, sigma)},
-                                  {2, 1, gauss(1.0, sigma)}});
+                                     {0, 2, gauss(1.0, sigma)},
+                                     {1, 0, gauss(0.5, sigma)},
+                                     {1, 2, gauss(2.0, sigma)},
+                                     {2, 0, gauss(3.0, sigma)},
+                                     {2, 1, gauss(1.0, sigma)}});
     }
 }
 
@@ -327,9 +327,9 @@ TEST_CASE("symmetrize: result is symmetric in the input direction", "[graph][sym
     for (const auto& [a, b, w] : fwd)
         rev.emplace_back(b, a, w);
     for (const bool prune : {false, true})
-        requireEdges(allEdgesOf(symmetrize(buildGraph(3, fwd), prune)), allEdgesOf(symmetrize(buildGraph(3, rev), prune)));
+        requireEdges(allEdgesOf(symmetrize(buildGraph(3, fwd), prune)),
+                     allEdgesOf(symmetrize(buildGraph(3, rev), prune)));
 }
-
 
 TEST_CASE("symmetrize: jaccard kernel on a symmetric kNN graph", "[graph][pipeline]") {
     const auto knn = cliqueKnn(2, 4); // nodes 0-3 and 4-7, k = 3
