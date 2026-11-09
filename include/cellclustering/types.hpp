@@ -35,8 +35,7 @@ namespace cellclustering {
             : dataPtr(data), nRows(rows), nCols(cols) {}
 
         explicit DenseMatrixView(const std::vector<DataType>& data, const std::size_t rows, const std::size_t cols)
-            : dataPtr(data.data()), nRows(rows), nCols(cols) 
-        {
+            : dataPtr(data.data()), nRows(rows), nCols(cols) {
             assert(data.size() == rows * cols);
         }
 
@@ -72,7 +71,7 @@ namespace cellclustering {
 
     struct LouvainResult {
         std::vector<IndexType> communities; // labels 0..C-1
-        double Q = 0;
+        double Q = 0;                       // modularity value
         int runs = 0;
     };
 
@@ -86,6 +85,5 @@ namespace cellclustering {
         // Modularity of the (unfiltered) Louvain partition on `graph`; NaN if no clustering was run.
         double Q = 0;
     };
-
 
 } // namespace cellclustering

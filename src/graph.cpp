@@ -13,9 +13,7 @@
 #include <cassert>
 #include <cmath>
 #include <numbers>
-#include <stdexcept>
 #include <thread>
-#include <unordered_map>
 
 namespace {
     using namespace cellclustering;
@@ -182,43 +180,6 @@ namespace cellclustering {
             p = q;
         }
         return makeGraph(boost::num_vertices(g), edges, w);
-    }
-
-    double modularity(const BGraph& graph, const std::vector<IndexType>& communities) {
-        const std::size_t n = boost::num_vertices(graph);
-        if (communities.size() != n)
-            throw std::invalid_argument("communities.size() != num_vertices(graph)");
-
-        std::vector<DistanceType> deg(n, 0.0);
-        DistanceType twoM = 0;
-        std::unordered_map<IndexType, DistanceType> tot, in;
-
-        const auto wmap = get(boost::edge_weight, graph);
-        for (auto [it, end] = boost::edges(graph); it != end; ++it) {
-            const auto i = boost::source(*it, graph), j = boost::target(*it, graph);
-            const DistanceType w = wmap[*it];
-            deg[i] += w;
-            deg[j] += w;
-            twoM += 2 * w;
-            if (communities[i] == communities[j])
-                in[communities[i]] += 2 * w;
-        }
-
-        if (isEqual(twoM, 0))
-            return 0.0;
-
-        for (std::size_t v = 0; v < n; ++v)
-            tot[communities[v]] += deg[v];
-
-        double inTotal = 0;
-        for (const DistanceType& d : std::views::values(in))
-            inTotal += d;
-
-        double q = inTotal / twoM;
-        for (const DistanceType& d : std::views::values(tot))
-            q -= (d / twoM) * (d / twoM);
-
-        return q;
     }
 
 } // namespace cellclustering

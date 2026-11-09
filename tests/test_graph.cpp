@@ -6,12 +6,13 @@
 #include <limits>
 #include <map>
 #include <numbers>
-#include <stdexcept>
 #include <tuple>
 #include <vector>
 
 #include "cellclustering/graph.hpp"
 #include "cellclustering/types.hpp"
+
+#include "test_utils.hpp"
 
 using namespace cellclustering;
 using Catch::Approx;
@@ -192,11 +193,11 @@ TEST_CASE("gaussianKernel: one edge per kNN entry with the expected weight", "[g
         const BGraph g = gaussianKernel(knn, sigma);
         CHECK(boost::num_vertices(g) == 3);
         requireEdges(allEdgesOf(g), {{0, 1, gauss(0.0, sigma)},
-                                  {0, 2, gauss(1.0, sigma)},
-                                  {1, 0, gauss(0.5, sigma)},
-                                  {1, 2, gauss(2.0, sigma)},
-                                  {2, 0, gauss(3.0, sigma)},
-                                  {2, 1, gauss(1.0, sigma)}});
+                                     {0, 2, gauss(1.0, sigma)},
+                                     {1, 0, gauss(0.5, sigma)},
+                                     {1, 2, gauss(2.0, sigma)},
+                                     {2, 0, gauss(3.0, sigma)},
+                                     {2, 1, gauss(1.0, sigma)}});
     }
 }
 
@@ -326,78 +327,11 @@ TEST_CASE("symmetrize: result is symmetric in the input direction", "[graph][sym
     for (const auto& [a, b, w] : fwd)
         rev.emplace_back(b, a, w);
     for (const bool prune : {false, true})
-        requireEdges(allEdgesOf(symmetrize(buildGraph(3, fwd), prune)), allEdgesOf(symmetrize(buildGraph(3, rev), prune)));
+        requireEdges(allEdgesOf(symmetrize(buildGraph(3, fwd), prune)),
+                     allEdgesOf(symmetrize(buildGraph(3, rev), prune)));
 }
 
-// ---------------------------------------------------------------------------------------------
-// modularity
-// ---------------------------------------------------------------------------------------------
-
-TEST_CASE("modularity: communities size must match vertex count", "[graph][modularity]") {
-    const BGraph g = buildGraph(3, {{0, 1, 1.0}});
-    CHECK_THROWS_AS(modularity(g, {0, 0}), std::invalid_argument);
-    CHECK_THROWS_AS(modularity(g, {0, 0, 0, 0}), std::invalid_argument);
-}
-
-TEST_CASE("modularity: graph without edges has modularity 0", "[graph][modularity]") {
-    CHECK(modularity(BGraph(0), {}) == Approx(0.0));
-    CHECK(modularity(BGraph(3), {0, 1, 2}) == Approx(0.0));
-}
-
-TEST_CASE("modularity: two disjoint triangles", "[graph][modularity]") {
-    const BGraph g = buildGraph(6, {{0, 1, 1.0}, {1, 2, 1.0}, {2, 0, 1.0}, {3, 4, 1.0}, {4, 5, 1.0}, {5, 3, 1.0}});
-    // 2m = 12; in_total = 12; each community has degree sum 6 -> Q = 1 - 2 * (6/12)^2 = 0.5
-    CHECK(modularity(g, {0, 0, 0, 1, 1, 1}) == Approx(0.5));
-    // everything in one community -> Q = 0
-    CHECK(modularity(g, {0, 0, 0, 0, 0, 0}) == Approx(0.0).margin(1e-12));
-}
-
-TEST_CASE("modularity: path graph with known value", "[graph][modularity]") {
-    const BGraph g = buildGraph(4, {{0, 1, 1.0}, {1, 2, 1.0}, {2, 3, 1.0}});
-    // 2m = 6, in_total = 4, tot = {3, 3} -> Q = 4/6 - 2 * (3/6)^2 = 1/6
-    CHECK(modularity(g, {0, 0, 1, 1}) == Approx(1.0 / 6.0));
-    // singletons: Q = -sum (d_i / 2m)^2 = -(1 + 4 + 4 + 1) / 36
-    CHECK(modularity(g, {0, 1, 2, 3}) == Approx(-10.0 / 36.0));
-}
-
-TEST_CASE("modularity: two nodes with a single edge", "[graph][modularity]") {
-    const BGraph g = buildGraph(2, {{0, 1, 2.0}});
-    CHECK(modularity(g, {0, 0}) == Approx(0.0).margin(1e-12));
-    CHECK(modularity(g, {0, 1}) == Approx(-0.5));
-}
-
-TEST_CASE("modularity: community labels are arbitrary", "[graph][modularity]") {
-    const BGraph g = buildGraph(6, {{0, 1, 1.0}, {1, 2, 1.0}, {2, 0, 1.0}, {3, 4, 1.0}, {4, 5, 1.0}, {5, 3, 1.0}});
-    CHECK(modularity(g, {7, 7, 7, 42, 42, 42}) == Approx(modularity(g, {0, 0, 0, 1, 1, 1})));
-    CHECK(modularity(g, {1, 1, 1, 0, 0, 0}) == Approx(modularity(g, {0, 0, 0, 1, 1, 1})));
-}
-
-TEST_CASE("modularity: invariant under global weight scaling", "[graph][modularity]") {
-    const std::vector<WEdge> base = {{0, 1, 1.0}, {1, 2, 2.0}, {2, 3, 1.0}, {3, 0, 0.5}, {1, 3, 0.25}};
-    std::vector<WEdge> scaled;
-    for (const auto& [a, b, w] : base)
-        scaled.emplace_back(a, b, 10.0 * w);
-    const std::vector<IndexType> comm = {0, 0, 1, 1};
-    CHECK(modularity(buildGraph(4, base), comm) == Approx(modularity(buildGraph(4, scaled), comm)));
-}
-
-TEST_CASE("modularity: parallel edges behave like one edge with the summed weight", "[graph][modularity]") {
-    const BGraph multi = buildGraph(3, {{0, 1, 1.0}, {0, 1, 1.0}, {1, 2, 1.0}});
-    const BGraph merged = buildGraph(3, {{0, 1, 2.0}, {1, 2, 1.0}});
-    CHECK(modularity(multi, {0, 0, 1}) == Approx(modularity(merged, {0, 0, 1})));
-}
-
-TEST_CASE("modularity: a good partition scores higher than a bad one", "[graph][modularity]") {
-    const BGraph g =
-        buildGraph(6, {{0, 1, 1.0}, {1, 2, 1.0}, {2, 0, 1.0}, {3, 4, 1.0}, {4, 5, 1.0}, {5, 3, 1.0}, {2, 3, 0.1}});
-    CHECK(modularity(g, {0, 0, 0, 1, 1, 1}) > modularity(g, {0, 1, 0, 1, 0, 1}));
-}
-
-// ---------------------------------------------------------------------------------------------
-// pipeline: kernel -> symmetrize -> modularity
-// ---------------------------------------------------------------------------------------------
-
-TEST_CASE("pipeline: two cliques are recovered with the expected modularity", "[graph][pipeline]") {
+TEST_CASE("symmetrize: jaccard kernel on a symmetric kNN graph", "[graph][pipeline]") {
     const auto knn = cliqueKnn(2, 4); // nodes 0-3 and 4-7, k = 3
 
     const BGraph jac = jaccardKernel(knn); // 24 directed edges, each 0.5
@@ -415,16 +349,16 @@ TEST_CASE("pipeline: two cliques are recovered with the expected modularity", "[
             CHECK(w == Approx(expectedW));
         }
         // 2m = 12 * w * 2; in_total = 2m; two equal communities -> Q = 1 - 2 * (1/2)^2 = 0.5
-        CHECK(modularity(sym, {0, 0, 0, 0, 1, 1, 1, 1}) == Approx(0.5));
-        CHECK(modularity(sym, {0, 1, 0, 1, 0, 1, 0, 1}) < 0.0);
+        CHECK(test::computeModularity(sym, {0, 0, 0, 0, 1, 1, 1, 1}) == Approx(0.5));
+        CHECK(test::computeModularity(sym, {0, 1, 0, 1, 0, 1, 0, 1}) < 0.0);
     }
 }
 
-TEST_CASE("pipeline: gaussian kernel on a symmetric kNN graph", "[graph][pipeline]") {
+TEST_CASE("symmetrize: gaussian kernel on a symmetric kNN graph", "[graph][pipeline]") {
     const auto knn = cliqueKnn(2, 3); // all distances == 1, k = 2
     const BGraph sym = symmetrize(gaussianKernel(knn, 1.0), false);
     REQUIRE(boost::num_edges(sym) == 6);
     for (const auto& [a, b, w] : allEdgesOf(sym))
         CHECK(w == Approx(gauss(1.0, 1.0)));
-    CHECK(modularity(sym, {0, 0, 0, 1, 1, 1}) == Approx(0.5));
+    CHECK(test::computeModularity(sym, {0, 0, 0, 1, 1, 1}) == Approx(0.5));
 }

@@ -22,4 +22,4 @@ namespace cellclustering {
     // <= min_size become -1 (this mirrors the reference code, whose docstring says "smaller").
     std::vector<IndexType> sortBySize(const std::vector<IndexType>& clusters, const IndexType minSize);
 
-    } // namespace cellclustering
+} // namespace cellclustering

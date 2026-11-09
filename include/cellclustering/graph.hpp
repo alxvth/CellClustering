@@ -7,8 +7,6 @@
 
 #pragma once
 
-#include <vector>
-
 #include "cellclustering/types.hpp"
 
 namespace cellclustering {
@@ -24,9 +22,5 @@ namespace cellclustering {
     // Symmetrize a directed graph and keep the strict lower triangle (row > col),
     // sorted by (row, col). prune=false: (G + G^T) / 2. prune=true: G ∘ G^T.
     BGraph symmetrize(const BGraph& graph, bool prune);
-
-    // Modularity (Newman–Girvan) of `communities` on the undirected multigraph whose edges
-    // are the stored entries of `graph` (each entry is one undirected edge).
-    double modularity(const BGraph& graph, const std::vector<IndexType>& communities);
 
 } // namespace cellclustering

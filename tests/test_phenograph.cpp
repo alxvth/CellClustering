@@ -45,7 +45,8 @@ namespace {
     }
 
     // Order-independent comparison (parallel edges are allowed, so compare sorted lists).
-    void requireSameEdges(const std::vector<WEdge>& actual, const std::vector<WEdge>& expected, const double margin = 1e-9) {
+    void requireSameEdges(const std::vector<WEdge>& actual, const std::vector<WEdge>& expected,
+                          const double margin = 1e-9) {
         const auto a = sorted(actual);
         const auto e = sorted(expected);
         REQUIRE(a.size() == e.size());
@@ -200,12 +201,11 @@ TEST_CASE("sortBySize relabels by descending size", "[core][sort]") {
 TEST_CASE("modularity", "[core][modularity]") {
     // two disjoint triangles: {0,1,2} and {3,4,5}
     const BGraph g = buildGraph(6, {{1, 0, 1.0}, {2, 0, 1.0}, {2, 1, 1.0}, {4, 3, 1.0}, {5, 3, 1.0}, {5, 4, 1.0}});
-    CHECK(modularity(g, {0, 0, 0, 1, 1, 1}) == Approx(0.5));
-    CHECK(modularity(g, {0, 0, 0, 0, 0, 0}) == Approx(0.0).margin(1e-12));
-    CHECK_THROWS_AS(modularity(g, {0, 1}), std::invalid_argument);
+    CHECK(test::computeModularity(g, {0, 0, 0, 1, 1, 1}) == Approx(0.5));
+    CHECK(test::computeModularity(g, {0, 0, 0, 0, 0, 0}) == Approx(0.0).margin(1e-12));
 }
 
 TEST_CASE("fixed dataset: reference communities have the reference modularity", "[core][modularity]") {
     // fixedAffinity() builds the BGraph from the reference affinity arrays.
-    CHECK(modularity(test::fixedAffinity(), test::communities) == Approx(test::kQLouvain).margin(1e-6));
+    CHECK(test::computeModularity(test::fixedAffinity(), test::communities) == Approx(test::kQLouvain).margin(1e-6));
 }
