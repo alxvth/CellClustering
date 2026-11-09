@@ -4,7 +4,6 @@
 #include <tuple>
 #include <vector>
 
-#include "cellclustering/graph.hpp"
 #include "cellclustering/louvain.hpp"
 #include "cellclustering/options.hpp"
 #include "cellclustering/types.hpp"
@@ -52,9 +51,12 @@ TEST_CASE("runLouvain on the reference affinity graph", "[louvain]") {
     const LouvainResult r = runLouvain(g, opt);
 
     const std::vector<IndexType>& communities = test::communities;
+
+    const double modularity = test::computeModularity(g, r.communities);
+
     CHECK(test::samePartition(r.communities, communities));
     CHECK(r.Q == Approx(test::kQLouvain).margin(1e-6));
-    CHECK(r.Q == Approx(modularity(g, r.communities)).margin(1e-9));
+    CHECK(r.Q == Approx(modularity).margin(1e-9));
     CHECK(r.runs >= 1);
 }
 
@@ -62,6 +64,8 @@ TEST_CASE("runLouvain finds planted communities", "[louvain]") {
     const Options opt = test::makeOptions(3);
     const BGraph g = twoCliques(12);
     const LouvainResult r = runLouvain(g, opt);
+
+    const double modularity = test::computeModularity(g, r.communities);
 
     REQUIRE(r.communities.size() == 24);
     CHECK(test::nDistinct(r.communities) == 2);
@@ -71,7 +75,7 @@ TEST_CASE("runLouvain finds planted communities", "[louvain]") {
     }
     CHECK(r.communities[0] != r.communities[12]);
     CHECK(r.Q > 0.4);
-    CHECK(r.Q == Approx(modularity(g, r.communities)).margin(1e-9));
+    CHECK(r.Q == Approx(modularity).margin(1e-9));
 }
 
 TEST_CASE("runLouvain is reproducible for a fixed seed", "[louvain]") {
