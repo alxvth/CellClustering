@@ -25,8 +25,4 @@ namespace cellclustering {
     // sorted by (row, col). prune=false: (G + G^T) / 2. prune=true: G ∘ G^T.
     BGraph symmetrize(const BGraph& graph, bool prune);
 
-    // Modularity (Newman–Girvan) of `communities` on the undirected multigraph whose edges
-    // are the stored entries of `graph` (each entry is one undirected edge).
-    double modularity(const BGraph& graph, const std::vector<IndexType>& communities);
-
 } // namespace cellclustering
