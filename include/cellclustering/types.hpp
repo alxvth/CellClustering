@@ -72,7 +72,7 @@ namespace cellclustering {
 
     struct LouvainResult {
         std::vector<IndexType> communities; // labels 0..C-1
-        double Q = 0;
+        double Q = 0;                       // modularity value
         int runs = 0;
     };
 
