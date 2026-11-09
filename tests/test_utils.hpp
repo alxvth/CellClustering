@@ -8,6 +8,8 @@
 #include "cellclustering/options.hpp"
 #include "cellclustering/types.hpp"
 
+#include <boost/graph/louvain_quality_functions.hpp>
+
 // data from https://github.com/dpeerlab/PhenoGraph/blob/v1.5.7/tests/conftest.py
 // Licence: MIT (2025) Jacob Levine, Columbia University
 namespace cellclustering::test {
@@ -140,5 +142,10 @@ namespace cellclustering::test {
         return std::set<T>(c.begin(), c.end()).size();
     }
 
+    inline double computeModularity(const BGraph& g, const std::vector<IndexType>& c) {
+        const auto weights = get(boost::edge_weight, g);
+        const auto components = boost::make_iterator_property_map(c.begin(), get(boost::vertex_index, g));
+        return boost::newman_and_girvan{}.quality(g, components, weights);
+    }
 
 } // namespace cellclustering::test
