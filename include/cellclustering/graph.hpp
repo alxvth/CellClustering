@@ -7,8 +7,6 @@
 
 #pragma once
 
-#include <vector>
-
 #include "cellclustering/types.hpp"
 
 namespace cellclustering {

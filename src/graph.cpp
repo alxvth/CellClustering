@@ -13,9 +13,7 @@
 #include <cassert>
 #include <cmath>
 #include <numbers>
-#include <stdexcept>
 #include <thread>
-#include <unordered_map>
 
 namespace {
     using namespace cellclustering;
