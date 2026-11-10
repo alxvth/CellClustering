@@ -23,7 +23,7 @@ namespace {
 
     KnnResult makeKnn(const std::size_t k, std::vector<EdgeList> rows) {
         KnnResult r;
-        r.k = k;
+        r.k            = k;
         r.neighborList = std::move(rows);
         return r;
     }
@@ -127,7 +127,7 @@ TEST_CASE("jaccardKernel: no overlap gives an edgeless graph with all vertices",
 }
 
 TEST_CASE("jaccardKernel: edge direction is preserved (source = row, target = neighbour)", "[graph][jaccard]") {
-    const BGraph g = jaccardKernel(cliqueKnn(1, 3)); // k = 2, shared = 1, w = 1/3
+    const BGraph g   = jaccardKernel(cliqueKnn(1, 3)); // k = 2, shared = 1, w = 1/3
     const auto edges = allEdgesOf(g);
     REQUIRE(edges.size() == 6);
     // both directions of every pair exist as separate edges
@@ -207,7 +207,7 @@ TEST_CASE("gaussianKernel: default sigma is 1", "[graph][gaussian]") {
 }
 
 TEST_CASE("gaussianKernel: zero distance gives the peak 1 / (sigma sqrt(2 pi))", "[graph][gaussian]") {
-    const auto knn = makeKnn(1, {{{1, 0.0}}, {{0, 0.0}}});
+    const auto knn   = makeKnn(1, {{{1, 0.0}}, {{0, 0.0}}});
     const auto edges = allEdgesOf(gaussianKernel(knn, 2.0));
     REQUIRE(edges.size() == 2);
     for (const auto& e : edges)
@@ -215,10 +215,10 @@ TEST_CASE("gaussianKernel: zero distance gives the peak 1 / (sigma sqrt(2 pi))",
 }
 
 TEST_CASE("gaussianKernel: weight decreases with distance and stays positive", "[graph][gaussian]") {
-    const auto knn = makeKnn(3, {{{1, 0.1}, {2, 1.0}, {3, 5.0}},
-                                 {{0, 1.0}, {2, 1.0}, {3, 1.0}},
-                                 {{0, 1.0}, {1, 1.0}, {3, 1.0}},
-                                 {{0, 1.0}, {1, 1.0}, {2, 1.0}}});
+    const auto knn   = makeKnn(3, {{{1, 0.1}, {2, 1.0}, {3, 5.0}},
+                                   {{0, 1.0}, {2, 1.0}, {3, 1.0}},
+                                   {{0, 1.0}, {1, 1.0}, {3, 1.0}},
+                                   {{0, 1.0}, {1, 1.0}, {2, 1.0}}});
     const auto edges = allEdgesOf(gaussianKernel(knn, 1.0));
     std::map<IndexType, double> fromZero;
     for (const auto& [a, b, w] : edges) {
@@ -232,9 +232,9 @@ TEST_CASE("gaussianKernel: weight decreases with distance and stays positive", "
 }
 
 TEST_CASE("gaussianKernel: larger sigma flattens the weights", "[graph][gaussian]") {
-    const auto knn = makeKnn(1, {{{1, 3.0}}, {{0, 3.0}}});
+    const auto knn      = makeKnn(1, {{{1, 3.0}}, {{0, 3.0}}});
     const double narrow = std::get<2>(allEdgesOf(gaussianKernel(knn, 0.5)).front());
-    const double wide = std::get<2>(allEdgesOf(gaussianKernel(knn, 5.0)).front());
+    const double wide   = std::get<2>(allEdgesOf(gaussianKernel(knn, 5.0)).front());
     // at d = 3 the wide kernel is much larger even though its peak is lower
     CHECK(wide > narrow);
 }
@@ -313,7 +313,7 @@ TEST_CASE("symmetrize: zero-weight results are dropped", "[graph][symmetrize]") 
 }
 
 TEST_CASE("symmetrize: does not modify its input", "[graph][symmetrize]") {
-    const BGraph in = buildGraph(3, {{0, 1, 2.0}, {1, 0, 4.0}, {2, 1, 1.0}});
+    const BGraph in   = buildGraph(3, {{0, 1, 2.0}, {1, 0, 4.0}, {2, 1, 1.0}});
     const auto before = allEdgesOf(in);
     (void)symmetrize(in, false);
     (void)symmetrize(in, true);
@@ -355,7 +355,7 @@ TEST_CASE("symmetrize: jaccard kernel on a symmetric kNN graph", "[graph][pipeli
 }
 
 TEST_CASE("symmetrize: gaussian kernel on a symmetric kNN graph", "[graph][pipeline]") {
-    const auto knn = cliqueKnn(2, 3); // all distances == 1, k = 2
+    const auto knn   = cliqueKnn(2, 3); // all distances == 1, k = 2
     const BGraph sym = symmetrize(gaussianKernel(knn, 1.0), false);
     REQUIRE(boost::num_edges(sym) == 6);
     for (const auto& [a, b, w] : allEdgesOf(sym))

@@ -9,15 +9,15 @@
 #include <random>
 #include <vector>
 
-#include "cellclustering/types.hpp"
 #include "cellclustering/neighbors.hpp"
+#include "cellclustering/types.hpp"
 
 #include "test_utils.hpp"
 
 using namespace cellclustering;
 
 namespace {
-    
+
     // Helper to create synthetic high-dimensional data in row-major layout
     std::vector<DataType> generateRandomData(const std::size_t nRows, const std::size_t nCols, std::mt19937& rng) {
         std::normal_distribution<DataType> dist(0.0f, 1.0f);
@@ -38,7 +38,7 @@ TEST_CASE("findNeighbors: Invariant and Contract Checks", "[knn][invariants]") {
 
     constexpr std::size_t nRows = 150;
     constexpr std::size_t nCols = 64;
-    constexpr std::size_t k = 10;
+    constexpr std::size_t k     = 10;
 
     const auto dataBuffer = generateRandomData(nRows, nCols, rng);
     const DenseMatrixView dataView{dataBuffer.data(), nRows, nCols};
@@ -50,7 +50,7 @@ TEST_CASE("findNeighbors: Invariant and Contract Checks", "[knn][invariants]") {
     Options opt;
     opt.nnMethod = method;
     opt.nnMetric = metric;
-    opt.k = k;
+    opt.k        = k;
 
     KnnResult res = findNeighbors(dataView, opt);
 
@@ -69,8 +69,8 @@ TEST_CASE("findNeighbors: Invariant and Contract Checks", "[knn][invariants]") {
                 const auto [neighborId, dist] = neighbors[j];
 
                 CHECK(neighborId < nRows);
-                CHECK(neighborId != rowIdx); // data point must not be its own neighbor
-                CHECK(dist >= 0.0); // distance must be non-negative
+                CHECK(neighborId != rowIdx);              // data point must not be its own neighbor
+                CHECK(dist >= 0.0);                       // distance must be non-negative
                 CHECK(seenIds.insert(neighborId).second); // no duplicate neighbors in the same row
 
                 // Ordered by increasing distance
@@ -89,30 +89,30 @@ TEST_CASE("findNeighbors: Approximate Recall vs. BruteForce", "[knn][recall]") {
 
     constexpr std::size_t nRows = 200;
     constexpr std::size_t nCols = 128;
-    constexpr std::size_t k = 10;
+    constexpr std::size_t k     = 10;
 
     const auto dataBuffer = generateRandomData(nRows, nCols, rng);
     const DenseMatrixView dataView{dataBuffer.data(), nRows, nCols};
 
-    auto metric = GENERATE(Metric::Euclidean, Metric::Cosine, Metric::Manhattan);
+    auto metric       = GENERATE(Metric::Euclidean, Metric::Cosine, Metric::Manhattan);
     auto approxMethod = GENERATE(NNMethod::HNSW, NNMethod::Annoy, NNMethod::KMKNN);
 
     // 1. Compute ground truth using the BruteForce backend
     Options bfOpt;
-    bfOpt.nnMethod = NNMethod::BruteForce;
-    bfOpt.nnMetric = metric;
-    bfOpt.k = k;
+    bfOpt.nnMethod              = NNMethod::BruteForce;
+    bfOpt.nnMetric              = metric;
+    bfOpt.k                     = k;
     const KnnResult groundTruth = findNeighbors(dataView, bfOpt);
 
     // 2. Compute approximate neighbors
     Options approxOpt;
-    approxOpt.nnMethod = approxMethod;
-    approxOpt.nnMetric = metric;
-    approxOpt.k = k;
+    approxOpt.nnMethod        = approxMethod;
+    approxOpt.nnMetric        = metric;
+    approxOpt.k               = k;
     const KnnResult approxRes = findNeighbors(dataView, approxOpt);
 
     // 3. Compute Recall@k across all points
-    std::size_t totalHits = 0;
+    std::size_t totalHits               = 0;
     constexpr std::size_t totalPossible = nRows * k;
 
     for (std::size_t i = 0; i < nRows; ++i) {
@@ -132,21 +132,20 @@ TEST_CASE("findNeighbors: Approximate Recall vs. BruteForce", "[knn][recall]") {
 
     const double recall = static_cast<double>(totalHits) / static_cast<double>(totalPossible);
 
-    INFO("Metric: " << toString(metric) << " | Method: " << toString(approxMethod)
-                    << " | Measured Recall@" << k << ": " << recall);
+    INFO("Metric: " << toString(metric) << " | Method: " << toString(approxMethod) << " | Measured Recall@" << k << ": "
+                    << recall);
 
     REQUIRE(recall >= 0.95);
 }
 
-
 TEST_CASE("findNeighbors: check affinity data", "[knn][internal]") {
 
-    const DenseMatrixView dataView{ test::testData, test::kN, test::kDim };
+    const DenseMatrixView dataView{test::testData, test::kN, test::kDim};
 
     Options bfOpt;
-    bfOpt.nnMethod = NNMethod::BruteForce;
-    bfOpt.nnMetric = Metric::Euclidean;
-    bfOpt.k = test::kK;
+    bfOpt.nnMethod      = NNMethod::BruteForce;
+    bfOpt.nnMetric      = Metric::Euclidean;
+    bfOpt.k             = test::kK;
     const KnnResult knn = findNeighbors(dataView, bfOpt);
 
     const KnnResult expectedKnn = test::fixedKnn();
@@ -159,5 +158,4 @@ TEST_CASE("findNeighbors: check affinity data", "[knn][internal]") {
             CHECK(knn.neighborList[i][j].first == expectedKnn.neighborList[i][j].first);
         }
     }
-
 }

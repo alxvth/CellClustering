@@ -60,7 +60,7 @@ namespace {
 
     KnnResult makeKnn(const std::size_t k, std::vector<EdgeList> rows) {
         KnnResult r;
-        r.k = k;
+        r.k            = k;
         r.neighborList = std::move(rows);
         return r;
     }
@@ -74,7 +74,7 @@ namespace {
 
 TEST_CASE("jaccardKernel reproduces the reference affinity graph", "[core][jaccard]") {
     const auto nJobs = GENERATE(1, 4);
-    const BGraph g = jaccardKernel(test::fixedKnn(), nJobs);
+    const BGraph g   = jaccardKernel(test::fixedKnn(), nJobs);
 
     const auto affinityValuesSize = test::affinityValues.size();
 
@@ -138,7 +138,7 @@ TEST_CASE("gaussianKernel", "[core][gaussian]") {
     }
 
     SECTION("sigma = 2") {
-        const double c = 1.0 / std::sqrt(2.0 * std::numbers::pi_v<double>);
+        const double c   = 1.0 / std::sqrt(2.0 * std::numbers::pi_v<double>);
         const auto edges = edgesInOrder(gaussianKernel(knn, 2.0));
         REQUIRE(edges.size() == 4);
         CHECK(std::get<2>(edges[1]) == Approx(c / 2 * std::exp(-0.5 * 0.25)));
@@ -177,7 +177,7 @@ TEST_CASE("symmetrize keeps the strict lower triangle", "[core][symmetrize]") {
 
     SECTION("prune keeps only mutual pairs") {
         const BGraph prod = symmetrize(g, /*prune=*/true);
-        const auto edges = edgesInOrder(prod);
+        const auto edges  = edgesInOrder(prod);
         REQUIRE(edges.size() == 1);
         CHECK(std::get<0>(edges[0]) == 1);
         CHECK(std::get<1>(edges[0]) == 0);
@@ -199,7 +199,7 @@ TEST_CASE("sortBySize relabels by descending size", "[core][sort]") {
 TEST_CASE("sortBySize breaks ties by smallest original label", "[core][sort]") {
     // sizes: label 7 -> 2, label 3 -> 2, label 8 -> 2, label 1 -> 1
     // Equal sizes must resolve by ascending label: 3 -> 0, 7 -> 1, 8 -> 2
-    const std::vector<IndexType> in = {7, 3, 8, 7, 3, 8, 1};
+    const std::vector<IndexType> in       = {7, 3, 8, 7, 3, 8, 1};
     const std::vector<IndexType> expected = {1, 0, 2, 1, 0, 2, 3};
     CHECK(sortBySize(in, 0) == expected);
 

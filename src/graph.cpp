@@ -38,7 +38,7 @@ namespace cellclustering {
 
     BGraph jaccardKernel(const KnnResult& knn, int nJobs) {
         const std::size_t n = knn.nRows();
-        const double twoK = 2.0 * static_cast<double>(knn.k);
+        const double twoK   = 2.0 * static_cast<double>(knn.k);
 
         if (isEqual(n, 0) || isEqual(twoK, 0))
             return BGraph(n);
@@ -49,7 +49,7 @@ namespace cellclustering {
                                    [&](const auto& row) { return row.size() == knn.neighborList.front().size(); }));
 
         const unsigned int numThreads = getNumThreads(nJobs);
-        const std::size_t total = n * knn.k;
+        const std::size_t total       = n * knn.k;
 
         // Sorte, neighbour sets
         std::vector<std::vector<IndexType>> neighborsSets(n);
@@ -73,7 +73,7 @@ namespace cellclustering {
 
 #pragma omp parallel for num_threads(numThreads) schedule(dynamic, 1)
         for (std::int64_t i = 0; i < static_cast<std::int64_t>(n); ++i) {
-            const auto& a = neighborsSets[i];
+            const auto& a   = neighborsSets[i];
             const auto& row = knn.neighborList[i];
 
             for (std::size_t j = 0; j < row.size(); ++j) {
@@ -168,7 +168,7 @@ namespace cellclustering {
         IndexPairList edges;
         std::vector<DistanceType> w;
         for (std::size_t p = 0; p < e.size();) {
-            std::size_t q = p;
+            std::size_t q      = p;
             DistanceType lower = 0, upper = 0;
             for (; q < e.size() && e[q].hi == e[p].hi && e[q].lo == e[p].lo; ++q)
                 (e[q].lower ? lower : upper) += e[q].w;

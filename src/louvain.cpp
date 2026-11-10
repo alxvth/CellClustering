@@ -18,8 +18,8 @@ namespace cellclustering {
     constexpr double kMinImprovement = 1e-6;
 
     LouvainResult runLouvain(const BGraph& graph, const Options& opt) {
-        using clock = std::chrono::steady_clock;
-        const auto tic = clock::now();
+        using clock         = std::chrono::steady_clock;
+        const auto tic      = clock::now();
         const std::size_t n = boost::num_vertices(graph);
 
         LouvainResult best;
@@ -37,8 +37,9 @@ namespace cellclustering {
         const auto weights = boost::get(boost::edge_weight, graph);
         std::vector<IndexType> comm(n);
 
-        double qRef = 0.0; // best accepted Q (reference starts at 0)
-        int run = 0, updated = 0;
+        double qRef  = 0.0; // best accepted Q (reference starts at 0)
+        int run      = 0;
+        int updated  = 0;
         auto elapsed = [&] { return std::chrono::duration<double>(clock::now() - tic).count(); };
         // The first run is unconditional so a result always exists.
         while (run == 0 || (run - updated < params.patience && run < params.maxRuns && elapsed() < params.timeLimit)) {
@@ -52,10 +53,10 @@ namespace cellclustering {
                 best.Q = q;
             }
             if (q - qRef > params.qTol) {
-                qRef = q;
+                qRef    = q;
                 updated = run;
+                best.Q  = q;
                 best.communities.assign(comm.begin(), comm.end());
-                best.Q = q;
             }
         }
         best.runs = run;

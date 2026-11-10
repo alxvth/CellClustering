@@ -49,7 +49,6 @@ namespace {
 
 } // namespace
 
-
 namespace cellclustering {
 
     std::string_view toString(const Metric m) noexcept {
