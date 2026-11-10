@@ -146,18 +146,18 @@ jobs:
     # Build the project
     - name: Build (Lib)
       run: |
-        cmake --build ${{github.workspace}}/build --target CellClustering --config Release
-        cmake --build ${{github.workspace}}/build --target CellClustering --config Debug
+        cmake --build ${{github.workspace}}/build --target CellClustering --parallel --config Release
+        cmake --build ${{github.workspace}}/build --target CellClustering --parallel --config Debug
 
     - name: Build (Examples)
       run: |
-        cmake --build ${{github.workspace}}/build --target CellClusteringExampleBlobs --config Release
-        cmake --build ${{github.workspace}}/build --target CellClusteringExampleBlobs --config Debug
+        cmake --build ${{github.workspace}}/build --target CellClusteringExampleBlobs --parallel --config Release
+        cmake --build ${{github.workspace}}/build --target CellClusteringExampleBlobs --parallel --config Debug
 
     - name: Build (Test)
       run: |
-        cmake --build ${{github.workspace}}/build --target CellClusteringTests --config Release
-        cmake --build ${{github.workspace}}/build --target CellClusteringTests --config Debug
+        cmake --build ${{github.workspace}}/build --target CellClusteringTests --parallel --config Release
+        cmake --build ${{github.workspace}}/build --target CellClusteringTests --parallel --config Debug
 
     # Run tests
     - name: Run tests
