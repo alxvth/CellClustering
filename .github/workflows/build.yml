@@ -11,7 +11,7 @@ env:
   
 jobs:
   build:
-    name: ${{ matrix.config.name }} (${{ matrix.build_type }})
+    name: ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
     strategy:
       fail-fast: true
@@ -36,14 +36,14 @@ jobs:
             os: ubuntu-24.04,
             cc: "gcc",
             cxx: "g++",
-            generator: "Ninja"
+            generator: "Ninja Multi-Config"
           }
         - {
             name: "Ubuntu 26 GCC 15",
             os: ubuntu-26.04,
             cc: "gcc",
             cxx: "g++",
-            generator: "Ninja"
+            generator: "Ninja Multi-Config"
           }
         - {
             name: "macOS 26 Xcode 26 (ARM)",
@@ -53,7 +53,6 @@ jobs:
             generator: "Xcode",
             xcode_version: "26.6"
           }
-        build_type: [Debug, Release]
 
     steps:
     - uses: actions/checkout@v7.0.1
@@ -77,9 +76,9 @@ jobs:
       uses: actions/cache@v6.1.0
       with:
         path: ${{ runner.temp }}/vcpkg-cache
-        key: vcpkg-cache-${{ runner.os }}-${{ matrix.os }}-${{ matrix.build-cversion }}-${{ env.VCPKG_COMMIT_SHA }}-${{ hashFiles('**/vcpkg.json', '**/vcpkg-overlays/**') }}
+        key: vcpkg-cache-${{ runner.os }}-${{ matrix.config.os }}-${{ env.VCPKG_COMMIT_SHA }}-${{ hashFiles('**/vcpkg.json', '**/vcpkg-overlays/**') }}
         restore-keys: |
-          vcpkg-cache-${{ runner.os }}-${{ matrix.os }}-${{ matrix.build-cversion }}-${{ env.VCPKG_COMMIT_SHA }}
+          vcpkg-cache-${{ runner.os }}-${{ matrix.config.os }}-${{ env.VCPKG_COMMIT_SHA }}
 
     - name: Clone and checkout vcpkg
       run: |
@@ -110,7 +109,10 @@ jobs:
         CXX: ${{ matrix.config.cxx }}
         CMAKE_TOOLCHAIN_FILE: "${{ env.VCPKG_ROOT }}/scripts/buildsystems/vcpkg.cmake"
       run: |
-        cmake -B ${{github.workspace}}/build  -G "${{ matrix.config.generator }}" -DCMAKE_BUILD_TYPE=${{matrix.build_type }} -DCELLCLUSTERING_BUILD_TESTS=ON -DCELLCLUSTERING_BUILD_EXAMPLES=ON -A x64 
+        cmake -B ${{github.workspace}}/build `
+              -G "${{ matrix.config.generator }}" `
+              -DCELLCLUSTERING_BUILD_TESTS=ON `
+              -DCELLCLUSTERING_BUILD_EXAMPLES=ON
 
     - name: Configure projects (Linux)
       if: runner.os == 'Linux'
@@ -122,7 +124,6 @@ jobs:
       run: |
         cmake -B ${{github.workspace}}/build \
               -G "${{ matrix.config.generator }}" \
-              -DCMAKE_BUILD_TYPE=${{matrix.build_type }} \
               -DCELLCLUSTERING_BUILD_TESTS=ON \
               -DCELLCLUSTERING_BUILD_EXAMPLES=ON
 
@@ -139,20 +140,35 @@ jobs:
         xcode-select --print-path
         cmake -B ${{github.workspace}}/build \
               -G "${{ matrix.config.generator }}" \
-              -DCMAKE_BUILD_TYPE=${{matrix.build_type }} \
               -DCELLCLUSTERING_BUILD_TESTS=ON \
               -DCELLCLUSTERING_BUILD_EXAMPLES=ON
 
     # Build the project
-    - name: Build (Lib)
-      run: cmake --build ${{github.workspace}}/build --target CellClustering --config ${{matrix.build_type }}
+    - name: Build (lib)
+      run: |
+        echo "Build lib Release"
+        cmake --build ${{github.workspace}}/build --target CellClustering --parallel --config Release
+        echo "Build lib Debug"
+        cmake --build ${{github.workspace}}/build --target CellClustering --parallel --config Debug
 
-    - name: Build (Examples)
-      run: cmake --build ${{github.workspace}}/build --target CellClusteringExampleBlobs --config ${{matrix.build_type }}
+    - name: Build (examples)
+      run: |
+        echo "Build examples Release"
+        cmake --build ${{github.workspace}}/build --target CellClusteringExampleBlobs --parallel --config Release
+        echo "Build examples Debug"
+        cmake --build ${{github.workspace}}/build --target CellClusteringExampleBlobs --parallel --config Debug
 
-    - name: Build (Test)
-      run: cmake --build ${{github.workspace}}/build --target CellClusteringTests --config ${{matrix.build_type }}
+    - name: Build (test)
+      run: |
+        echo "Build test Release"
+        cmake --build ${{github.workspace}}/build --target CellClusteringTests --parallel --config Release
+        echo "Build test Debug"
+        cmake --build ${{github.workspace}}/build --target CellClusteringTests --parallel --config Debug
 
     # Run tests
     - name: Run tests
-      run: ctest --test-dir ${{github.workspace}}/build --build-config ${{ matrix.build_type }} --verbose
+      run: |
+        echo "Run tests Release"
+        ctest --test-dir ${{github.workspace}}/build --build-config Release --output-on-failure
+        echo "Run tests Debug"
+        ctest --test-dir ${{github.workspace}}/build --build-config Debug --output-on-failure
