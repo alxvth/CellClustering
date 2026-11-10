@@ -72,13 +72,18 @@ jobs:
         echo "VCPKG_ROOT=${{ runner.temp }}/vcpkg" >> $env:GITHUB_ENV
         echo "VCPKG_BINARY_SOURCES=clear;files,${{ runner.temp }}/vcpkg-cache,readwrite" >> $env:GITHUB_ENV
 
+    - name: Print binary cache key
+      run: | 
+        echo "vcpkg-cache-${{ runner.os }}-${{ matrix.config.os }}-${{ env.VCPKG_COMMIT_SHA }}-${{ hashFiles('**/vcpkg.json', '**/vcpkg-overlays/**') }}"
+        echo "vcpkg-cache-${{ runner.os }}-${{ matrix.os }}-${{ matrix.build-cversion }}-${{ env.VCPKG_COMMIT_SHA }}-${{ hashFiles('**/vcpkg.json', '**/vcpkg-overlays/**') }}"
+
     - name: Set up binary cache
       uses: actions/cache@v6.1.0
       with:
         path: ${{ runner.temp }}/vcpkg-cache
-        key: vcpkg-cache-${{ runner.os }}-${{ matrix.os }}-${{ matrix.build-cversion }}-${{ env.VCPKG_COMMIT_SHA }}-${{ hashFiles('**/vcpkg.json', '**/vcpkg-overlays/**') }}
+        key: vcpkg-cache-${{ runner.os }}-${{ matrix.config.os }}-${{ env.VCPKG_COMMIT_SHA }}-${{ hashFiles('**/vcpkg.json', '**/vcpkg-overlays/**') }}
         restore-keys: |
-          vcpkg-cache-${{ runner.os }}-${{ matrix.os }}-${{ matrix.build-cversion }}-${{ env.VCPKG_COMMIT_SHA }}
+          vcpkg-cache-${{ runner.os }}-${{ matrix.config.os }}-${{ env.VCPKG_COMMIT_SHA }}
 
     - name: Clone and checkout vcpkg
       run: |
