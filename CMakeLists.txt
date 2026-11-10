@@ -34,7 +34,7 @@ project(CellClustering
 # -----------------------------------------------------------------------------
 
 find_package(OpenMP REQUIRED)
-find_package(Boost CONFIG REQUIRED COMPONENTS graph)
+find_package(Boost CONFIG REQUIRED COMPONENTS graph unordered)
 find_package(knncolle_knncolle CONFIG REQUIRED)
 find_package(knncolle_knncolle_annoy CONFIG REQUIRED)
 find_package(knncolle_knncolle_hnsw CONFIG REQUIRED)
@@ -106,6 +106,7 @@ target_link_libraries(CellClustering
     PUBLIC 
         Boost::graph
     PRIVATE 
+        Boost::unordered
         knncolle::knncolle_annoy
         knncolle::knncolle_hnsw
         knncolle::knncolle_kmknn
