@@ -11,7 +11,7 @@ env:
   
 jobs:
   build:
-    name: ${{ matrix.config.name }} (${{ matrix.build_type }})
+    name: ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
     strategy:
       fail-fast: true
@@ -36,14 +36,14 @@ jobs:
             os: ubuntu-24.04,
             cc: "gcc",
             cxx: "g++",
-            generator: "Ninja"
+            generator: "Ninja Multi-Config"
           }
         - {
             name: "Ubuntu 26 GCC 15",
             os: ubuntu-26.04,
             cc: "gcc",
             cxx: "g++",
-            generator: "Ninja"
+            generator: "Ninja Multi-Config"
           }
         - {
             name: "macOS 26 Xcode 26 (ARM)",
@@ -53,7 +53,6 @@ jobs:
             generator: "Xcode",
             xcode_version: "26.6"
           }
-        build_type: [Debug, Release]
 
     steps:
     - uses: actions/checkout@v7.0.1
@@ -110,7 +109,10 @@ jobs:
         CXX: ${{ matrix.config.cxx }}
         CMAKE_TOOLCHAIN_FILE: "${{ env.VCPKG_ROOT }}/scripts/buildsystems/vcpkg.cmake"
       run: |
-        cmake -B ${{github.workspace}}/build  -G "${{ matrix.config.generator }}" -DCMAKE_BUILD_TYPE=${{matrix.build_type }} -DCELLCLUSTERING_BUILD_TESTS=ON -DCELLCLUSTERING_BUILD_EXAMPLES=ON -A x64 
+        cmake -B ${{github.workspace}}/build `
+              -G "${{ matrix.config.generator }}" `
+              -DCELLCLUSTERING_BUILD_TESTS=ON `
+              -DCELLCLUSTERING_BUILD_EXAMPLES=ON
 
     - name: Configure projects (Linux)
       if: runner.os == 'Linux'
@@ -122,7 +124,6 @@ jobs:
       run: |
         cmake -B ${{github.workspace}}/build \
               -G "${{ matrix.config.generator }}" \
-              -DCMAKE_BUILD_TYPE=${{matrix.build_type }} \
               -DCELLCLUSTERING_BUILD_TESTS=ON \
               -DCELLCLUSTERING_BUILD_EXAMPLES=ON
 
@@ -139,20 +140,27 @@ jobs:
         xcode-select --print-path
         cmake -B ${{github.workspace}}/build \
               -G "${{ matrix.config.generator }}" \
-              -DCMAKE_BUILD_TYPE=${{matrix.build_type }} \
               -DCELLCLUSTERING_BUILD_TESTS=ON \
               -DCELLCLUSTERING_BUILD_EXAMPLES=ON
 
     # Build the project
     - name: Build (Lib)
-      run: cmake --build ${{github.workspace}}/build --target CellClustering --config ${{matrix.build_type }}
+      run: |
+        cmake --build ${{github.workspace}}/build --target CellClustering --config Release
+        cmake --build ${{github.workspace}}/build --target CellClustering --config Debug
 
     - name: Build (Examples)
-      run: cmake --build ${{github.workspace}}/build --target CellClusteringExampleBlobs --config ${{matrix.build_type }}
+      run: |
+        cmake --build ${{github.workspace}}/build --target CellClusteringExampleBlobs --config Release
+        cmake --build ${{github.workspace}}/build --target CellClusteringExampleBlobs --config Debug
 
     - name: Build (Test)
-      run: cmake --build ${{github.workspace}}/build --target CellClusteringTests --config ${{matrix.build_type }}
+      run: |
+        cmake --build ${{github.workspace}}/build --target CellClusteringTests --config Release
+        cmake --build ${{github.workspace}}/build --target CellClusteringTests --config Debug
 
     # Run tests
     - name: Run tests
-      run: ctest --test-dir ${{github.workspace}}/build --build-config ${{ matrix.build_type }} --verbose
+      run: |
+        ctest --test-dir ${{github.workspace}}/build --build-config Release --verbose
+        ctest --test-dir ${{github.workspace}}/build --build-config Debug --verbose
