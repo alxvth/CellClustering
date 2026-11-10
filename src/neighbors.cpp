@@ -30,11 +30,11 @@ namespace cellclustering {
 
         NeighborList knnHnsw(const SimpleMatrix& mat, const Options& opt) {
             using HnswBuilder = knncolle_hnsw::HnswBuilder<IndexType, DataType, DistanceType, SimpleMatrix>;
-            using HnswIndex = knncolle::Prebuilt<IndexType, DataType, DistanceType>;
+            using HnswIndex   = knncolle::Prebuilt<IndexType, DataType, DistanceType>;
 
-            const knncolle_hnsw::HnswOptions knnOpts = {.num_links = opt.hnsw.numLinks,
+            const knncolle_hnsw::HnswOptions knnOpts = {.num_links       = opt.hnsw.numLinks,
                                                         .ef_construction = opt.hnsw.efConstruction,
-                                                        .ef_search = opt.hnsw.efSearch};
+                                                        .ef_search       = opt.hnsw.efSearch};
 
             std::unique_ptr<HnswBuilder> hnswBuilder;
 
@@ -66,7 +66,7 @@ namespace cellclustering {
 
             std::unique_ptr<AnnoyIndex> annoyIndex;
 
-            const knncolle_annoy::AnnoyOptions knnOpts = {.num_trees = opt.annoy.nTrees,
+            const knncolle_annoy::AnnoyOptions knnOpts = {.num_trees   = opt.annoy.nTrees,
                                                           .search_mult = opt.annoy.searchK};
 
             switch (opt.nnMetric) {
@@ -92,7 +92,7 @@ namespace cellclustering {
 
         NeighborList knnKmknn(const SimpleMatrix& mat, const Options& opt) {
             using KmknnBuilder = knncolle_kmknn::KmknnBuilder<IndexType, DataType, DistanceType, SimpleMatrix>;
-            using KmknnIndex = knncolle::Prebuilt<IndexType, DataType, DistanceType>;
+            using KmknnIndex   = knncolle::Prebuilt<IndexType, DataType, DistanceType>;
 
             const KmknnBuilder::Options knnOpts = {
                 .power = opt.kmknn.power, .initialize_algorithm = nullptr, .refine_algorithm = nullptr};
@@ -115,7 +115,7 @@ namespace cellclustering {
                 break;
             }
             case Metric::Cosine: {
-                const auto kmknnMetricData = std::make_shared<knncolle::CosineDistance<DataType, DistanceType>>();
+                const auto kmknnMetricData   = std::make_shared<knncolle::CosineDistance<DataType, DistanceType>>();
                 const auto kmknnMetricCenter = std::make_shared<knncolle::CosineDistance<DistanceType, DistanceType>>();
                 kmknnBuilder.reset(new KmknnBuilder(kmknnMetricData, kmknnMetricCenter, knnOpts));
             }
@@ -128,7 +128,7 @@ namespace cellclustering {
 
         NeighborList knnBruteForce(const SimpleMatrix& mat, const Options& opt) {
             using BfBuilder = knncolle::BruteforceBuilder<IndexType, DataType, DistanceType, SimpleMatrix>;
-            using BfIndex = knncolle::Prebuilt<IndexType, DataType, DistanceType>;
+            using BfIndex   = knncolle::Prebuilt<IndexType, DataType, DistanceType>;
 
             std::unique_ptr<BfBuilder> bfBuilder;
 

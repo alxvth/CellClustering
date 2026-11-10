@@ -29,9 +29,9 @@ namespace cellclustering {
     std::string_view toString(ClusteringAlgo a) noexcept;
 
     struct HnswParams {
-        int numLinks = 16;         // equivalent to the `M` parameter
+        int numLinks       = 16; // equivalent to the `M` parameter
         int efConstruction = 200;
-        int efSearch = 10;
+        int efSearch       = 10;
     };
 
     struct AnnoyParams {
@@ -45,10 +45,10 @@ namespace cellclustering {
     };
 
     struct LouvainParams {
-        double qTol = 1e-3;
+        double qTol      = 1e-3;
         double timeLimit = 2000; // seconds
-        int maxRuns = 100;
-        int patience = 20;
+        int maxRuns      = 100;
+        int patience     = 20;
     };
 
     // Main settings
@@ -56,32 +56,31 @@ namespace cellclustering {
         // ---- Community detection ----
         ClusteringAlgo clusteringAlgo = ClusteringAlgo::Louvain;
         LouvainParams louvainParams{};
-        bool directed = false;   // keep the asymmetric kNN graph
-        bool prune = false;      // symmetrize with product instead of average (forces directed=false)
-        std::size_t minClusterSize = 10; // clusters with size <= this get label std::numeric_limits<size_t>::max
-        bool jaccard = true;     // Jaccard weights; false = Gaussian kernel (sigma = 1)
-        bool returnGraph = true;
+        bool directed              = false; // keep the asymmetric kNN graph
+        bool prune                 = false; // symmetrize with product instead of average (forces directed=false)
+        std::size_t minClusterSize = 10;    // clusters with size <= this get label std::numeric_limits<size_t>::max
+        bool jaccard               = true;  // Jaccard weights; false = Gaussian kernel (sigma = 1)
+        bool returnGraph           = true;
 
         // ---- knn ----
-        int k = 30; // neighbours in the first graph-construction step
-        Metric nnMetric = Metric::Euclidean;
+        int k             = 30; // neighbours in the first graph-construction step
+        Metric nnMetric   = Metric::Euclidean;
         NNMethod nnMethod = NNMethod::HNSW;
         HnswParams hnsw{};
         AnnoyParams annoy{};
         KMKNNParams kmknn{};
-    
+
         // ---- extras ----
         std::optional<std::uint64_t> seed; // seeds ANN builds and Louvain restarts
         bool verbose = false;              // progress messages on stderr
-        int nJobs = -1;                    // -1 all cores; < -1: n_cpus + 1 + n_jobs
-
+        int nJobs    = -1;                 // -1 all cores; < -1: n_cpus + 1 + n_jobs
     };
 
     constexpr std::size_t NOT_ASSIGNED = std::numeric_limits<std::size_t>::max();
 
     // nJobs    Behavior
     // < 0	    Use all available hardware threads
-    // == 0     Use a single thread 
+    // == 0     Use a single thread
     // > 0      Use the smaller of nJobs and available hardware threads
     unsigned int getNumThreads(int nJobs);
 

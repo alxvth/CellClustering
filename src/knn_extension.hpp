@@ -9,19 +9,19 @@
 
 #include <cmath>
 #include <cstring>
-#include <limits>
 #include <filesystem>
+#include <limits>
 
 #include <knncolle/distances.hpp>
-#include <knncolle_hnsw/Hnsw.hpp>       // for hnswlib::SpaceInterface, import before knncolle_hnsw/distances
+#include <knncolle_hnsw/Hnsw.hpp> // for hnswlib::SpaceInterface, import before knncolle_hnsw/distances
 #include <knncolle_hnsw/distances.hpp>
 
 namespace knncolle {
     // This implementation chooses to return 1 if any input vector's magnitude is 0
     // instead of throwing even though the distance is not well defined
-    template <typename Data_, typename Distance_> 
+    template <typename Data_, typename Distance_>
     Distance_ cosine_distance(std::size_t num_dimensions, const Data_* x, const Data_* y) {
-        Distance_ dot = 0.0;
+        Distance_ dot    = 0.0;
         Distance_ norm_a = 0.0;
         Distance_ norm_b = 0.0;
 
@@ -45,8 +45,7 @@ namespace knncolle {
      * @tparam Data_ Numeric type for the input data.
      * @tparam Distance_ Numeric type for the output distance, usually floating-point.
      */
-    template <typename Data_, typename Distance_>
-    class CosineDistance final : public DistanceMetric<Data_, Distance_> {
+    template <typename Data_, typename Distance_> class CosineDistance final : public DistanceMetric<Data_, Distance_> {
     public:
         /**
          * @cond
@@ -80,8 +79,7 @@ namespace knncolle_hnsw {
      *
      * @tparam HnswData_ Type of data in the HNSW index, usually floating-point.
      */
-    template <typename HnswData_ = float>
-    class CosineDistance final : public hnswlib::SpaceInterface<HnswData_> {
+    template <typename HnswData_ = float> class CosineDistance final : public hnswlib::SpaceInterface<HnswData_> {
     private:
         std::size_t my_data_size;
         std::size_t my_dim;
@@ -112,14 +110,13 @@ namespace knncolle_hnsw {
         static HnswData_ COSINE(const void* pVect1v, const void* pVect2v, const void* qty_ptr) {
             const HnswData_* pVect1 = static_cast<const HnswData_*>(pVect1v);
             const HnswData_* pVect2 = static_cast<const HnswData_*>(pVect2v);
-            const std::size_t qty = *(static_cast<const std::size_t*>(qty_ptr));
+            const std::size_t qty   = *(static_cast<const std::size_t*>(qty_ptr));
             return knncolle::cosine_distance<HnswData_, HnswData_>(qty, pVect1, pVect2);
         }
         /**
          * @endcond
          */
     };
-
 
     /**
      * @tparam Distance_ Floating-point type for the distances.

@@ -42,12 +42,12 @@ namespace {
 } // namespace
 
 TEST_CASE("runLouvain on the reference affinity graph", "[louvain]") {
-    Options opt = test::makeOptions(1);
-    opt.louvainParams.qTol = 1e-3;
+    Options opt                 = test::makeOptions(1);
+    opt.louvainParams.qTol      = 1e-3;
     opt.louvainParams.timeLimit = 2000;
 
     // fixedAffinity() must now return a BGraph (see note on the reference graph).
-    const BGraph g = test::fixedAffinity();
+    const BGraph g        = test::fixedAffinity();
     const LouvainResult r = runLouvain(g, opt);
 
     const std::vector<IndexType>& communities = test::communities;
@@ -61,8 +61,8 @@ TEST_CASE("runLouvain on the reference affinity graph", "[louvain]") {
 }
 
 TEST_CASE("runLouvain finds planted communities", "[louvain]") {
-    const Options opt = test::makeOptions(3);
-    const BGraph g = twoCliques(12);
+    const Options opt     = test::makeOptions(3);
+    const BGraph g        = twoCliques(12);
     const LouvainResult r = runLouvain(g, opt);
 
     const double modularity = test::computeModularity(g, r.communities);
@@ -80,9 +80,9 @@ TEST_CASE("runLouvain finds planted communities", "[louvain]") {
 
 TEST_CASE("runLouvain is reproducible for a fixed seed", "[louvain]") {
     const Options opt = test::makeOptions(99);
-    const BGraph g = twoCliques(10);
-    const auto a = runLouvain(g, opt);
-    const auto b = runLouvain(g, opt);
+    const BGraph g    = twoCliques(10);
+    const auto a      = runLouvain(g, opt);
+    const auto b      = runLouvain(g, opt);
     CHECK(a.communities == b.communities);
     CHECK(a.Q == Approx(b.Q));
     CHECK(a.runs == b.runs);
@@ -92,18 +92,18 @@ TEST_CASE("runLouvain restart policy", "[louvain]") {
     const BGraph g = twoCliques(8);
 
     SECTION("maxRuns caps the number of restarts") {
-        Options opt = test::makeOptions(5);
+        Options opt               = test::makeOptions(5);
         opt.louvainParams.maxRuns = 3;
-        const auto r = runLouvain(g, opt);
+        const auto r              = runLouvain(g, opt);
         CHECK(r.runs >= 1);
         CHECK(r.runs <= 3);
     }
 
     SECTION("patience stops after that many runs without improvement") {
-        Options opt = test::makeOptions(5);
-        opt.louvainParams.maxRuns = 100;
+        Options opt                = test::makeOptions(5);
+        opt.louvainParams.maxRuns  = 100;
         opt.louvainParams.patience = 2;
-        const auto r = runLouvain(g, opt);
+        const auto r               = runLouvain(g, opt);
         CHECK(r.runs >= 1);
         CHECK(r.runs <= 100);
         // The first run is accepted (Q > qTol) and later restarts find the same optimum,
@@ -112,15 +112,15 @@ TEST_CASE("runLouvain restart policy", "[louvain]") {
     }
 
     SECTION("timeLimit = 0 still makes exactly one run") {
-        Options opt = test::makeOptions(5);
+        Options opt                 = test::makeOptions(5);
         opt.louvainParams.timeLimit = 0;
-        const auto r = runLouvain(g, opt);
+        const auto r                = runLouvain(g, opt);
         CHECK(r.runs == 1);
         CHECK(r.communities.size() == 16);
     }
 
     SECTION("maxRuns = 1 makes exactly one run") {
-        Options opt = test::makeOptions(5);
+        Options opt               = test::makeOptions(5);
         opt.louvainParams.maxRuns = 1;
         CHECK(runLouvain(g, opt).runs == 1);
     }
@@ -139,8 +139,8 @@ TEST_CASE("runLouvain edge cases", "[louvain]") {
 
     SECTION("isolated vertices stay singletons") {
         const Options opt = test::makeOptions(2);
-        const BGraph g = twoCliques(6, 2); // vertices 12, 13 have no edges
-        const auto r = runLouvain(g, opt);
+        const BGraph g    = twoCliques(6, 2); // vertices 12, 13 have no edges
+        const auto r      = runLouvain(g, opt);
         REQUIRE(r.communities.size() == 14);
         CHECK(r.communities[12] != r.communities[13]);
         CHECK(test::nDistinct(r.communities) == 4);

@@ -13,9 +13,9 @@
 // data from https://github.com/dpeerlab/PhenoGraph/blob/v1.5.7/tests/conftest.py
 // Licence: MIT (2025) Jacob Levine, Columbia University
 namespace cellclustering::test {
-    inline constexpr std::size_t kN = 30;
+    inline constexpr std::size_t kN   = 30;
     inline constexpr std::size_t kDim = 2;
-    inline constexpr std::size_t kK = 5;
+    inline constexpr std::size_t kK   = 5;
 
     inline constexpr double kQLouvain = 0.666593;
 
@@ -92,9 +92,9 @@ namespace cellclustering::test {
     inline BGraph fixedAffinity() {
         using namespace cellclustering;
 
-        constexpr std::size_t n = test::kN;
-        const std::vector<IndexType>& rows = test::affinityRow;
-        const std::vector<IndexType>& cols = test::affinityCol;
+        constexpr std::size_t n               = test::kN;
+        const std::vector<IndexType>& rows    = test::affinityRow;
+        const std::vector<IndexType>& cols    = test::affinityCol;
         const std::vector<DistanceType>& vals = test::affinityValues;
 
         if (rows.size() != cols.size() || rows.size() != vals.size())
@@ -140,7 +140,7 @@ namespace cellclustering::test {
     }
 
     inline double computeModularity(const BGraph& g, const std::vector<IndexType>& c) {
-        const auto weights = get(boost::edge_weight, g);
+        const auto weights    = get(boost::edge_weight, g);
         const auto components = boost::make_iterator_property_map(c.begin(), get(boost::vertex_index, g));
         return boost::newman_and_girvan{}.quality(g, components, weights);
     }

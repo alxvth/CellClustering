@@ -35,7 +35,7 @@ int main() {
 
     // random points: three blobs
     constexpr std::size_t nSamples = 150;
-    constexpr std::size_t nDim = 2;
+    constexpr std::size_t nDim     = 2;
 
     const std::vector<float> X = createBlobData(nSamples, nDim);
 
@@ -43,13 +43,13 @@ int main() {
 
     cellclustering::Options opt;
     opt.nnMethod = cellclustering::NNMethod::Annoy;
-    opt.seed = 1;
-    opt.verbose = true;
+    opt.seed     = 1;
+    opt.verbose  = true;
 
-    const auto t0 = std::chrono::steady_clock::now();
+    const auto t0         = std::chrono::steady_clock::now();
     const auto dataMatrix = cellclustering::DenseMatrixView(X, nSamples, nDim);
-    const auto res = cellclustering::phenograph(dataMatrix, opt);
-    const auto dt = std::chrono::steady_clock::now() - t0;
+    const auto res        = cellclustering::phenograph(dataMatrix, opt);
+    const auto dt         = std::chrono::steady_clock::now() - t0;
 
     plotScatter(X, assignClusterColors(res.communities), "example_blobs_02_communities.png");
 
@@ -67,11 +67,11 @@ int main() {
 
 namespace {
     void plotScatter(const std::vector<float>& X, const std::vector<RGB>& colors, const char* filename) {
-        constexpr int width = 600;
-        constexpr int height = 600;
-        constexpr int imgSize = width * height * 3;
+        constexpr int width         = 600;
+        constexpr int height        = 600;
+        constexpr int imgSize       = width * height * 3;
         const std::size_t numPoints = X.size() / 2;
-        const bool hasColors = colors.size() == numPoints;
+        const bool hasColors        = colors.size() == numPoints;
 
         constexpr unsigned char defaultR = 30;
         constexpr unsigned char defaultG = 100;
@@ -94,8 +94,8 @@ namespace {
         }
 
         constexpr float margin = 0.1f;
-        const float dx = (xmax - xmin) * margin;
-        const float dy = (ymax - ymin) * margin;
+        const float dx         = (xmax - xmin) * margin;
+        const float dy         = (ymax - ymin) * margin;
 
         xmin -= dx;
         xmax += dx;
@@ -117,7 +117,7 @@ namespace {
                         if (xx >= 0 && xx < width && yy >= 0 && yy < height) {
                             const std::size_t idx = (yy * width + xx) * 3;
 
-                            image[idx] = hasColors ? colors[i].r : defaultR;
+                            image[idx]     = hasColors ? colors[i].r : defaultR;
                             image[idx + 1] = hasColors ? colors[i].g : defaultG;
                             image[idx + 2] = hasColors ? colors[i].b : defaultB;
                         }

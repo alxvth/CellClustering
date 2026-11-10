@@ -49,7 +49,7 @@ namespace cellclustering {
         std::vector<IndexType> out(clusters.size());
         for (std::size_t i = 0; i < clusters.size(); ++i) {
             auto it = relabel.find(clusters[i]);
-            out[i] = it != relabel.end() ? it->second : dropped;
+            out[i]  = it != relabel.end() ? it->second : dropped;
         }
 
         return out;
@@ -67,7 +67,7 @@ namespace cellclustering {
                           << " seconds\n";
         };
 
-        auto tic = clock::now();
+        auto tic     = clock::now();
         BGraph graph = opt.jaccard ? jaccardKernel(knn, opt.nJobs) : gaussianKernel(knn, 1.0);
         log(opt.jaccard ? "Jaccard graph constructed" : "Gaussian kernel graph constructed", tic);
         if (!opt.directed)
@@ -76,11 +76,11 @@ namespace cellclustering {
         PhenographResult res;
         res.Q = std::numeric_limits<double>::quiet_NaN();
         if (opt.clusteringAlgo == ClusteringAlgo::Louvain) {
-            tic = clock::now();
+            tic                    = clock::now();
             const LouvainResult lr = runLouvain(graph, opt);
             log("Louvain completed", tic);
             res.communities = sortBySize(lr.communities, opt.minClusterSize);
-            res.Q = lr.Q;
+            res.Q           = lr.Q;
         }
 
         if (opt.returnGraph) {
@@ -92,7 +92,7 @@ namespace cellclustering {
 
     PhenographResult phenograph(const DenseMatrixView& data, const Options& opt) {
         validate(opt);
-        const auto tic = std::chrono::steady_clock::now();
+        const auto tic      = std::chrono::steady_clock::now();
         const KnnResult knn = findNeighbors(data, opt);
         if (opt.verbose)
             std::cerr << "Neighbors computed in "
