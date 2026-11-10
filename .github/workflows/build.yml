@@ -162,5 +162,5 @@ jobs:
     # Run tests
     - name: Run tests
       run: |
-        ctest --test-dir ${{github.workspace}}/build --build-config Release --verbose
-        ctest --test-dir ${{github.workspace}}/build --build-config Debug --verbose
+        ctest --test-dir ${{github.workspace}}/build --build-config Release --output-on-failure
+        ctest --test-dir ${{github.workspace}}/build --build-config Debug --output-on-failure
