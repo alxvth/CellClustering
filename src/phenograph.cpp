@@ -7,36 +7,50 @@
 
 #include "cellclustering/phenograph.hpp"
 
+#include "cellclustering/graph.hpp"
+#include "cellclustering/louvain.hpp"
+#include "cellclustering/neighbors.hpp"
+
+#include <boost/unordered/unordered_flat_map.hpp>
+
 #include <algorithm>
 #include <chrono>
 #include <iostream>
 #include <limits>
-#include <map>
-
-#include "cellclustering/graph.hpp"
-#include "cellclustering/louvain.hpp"
-#include "cellclustering/neighbors.hpp"
 
 namespace cellclustering {
 
     // Relabel clusters by descending size (labels 0..). Clusters whose size is
     // <= min_size become -1 (this mirrors the reference code, whose docstring says "smaller").
     std::vector<IndexType> sortBySize(const std::vector<IndexType>& clusters, const IndexType minSize) {
-        std::map<IndexType, IndexType> sizes;
+        boost::unordered_flat_map<IndexType, IndexType> sizes;
         for (auto c : clusters)
             ++sizes[c];
 
-        std::vector<std::pair<IndexType, IndexType>> order(sizes.begin(), sizes.end());
-        std::ranges::stable_sort(order, [](const auto& a, const auto& b) { return a.second > b.second; });
+        // Only clusters that survive the minSize filter need ranking
+        std::vector<std::pair<IndexType, IndexType>> order;
+        order.reserve(sizes.size());
+        for (const auto& [label, size] : sizes)
+            if (size > minSize)
+                order.emplace_back(label, size);
 
-        std::map<IndexType, IndexType> relabel;
+        // Explicit tie-break on label: unordered iteration order is unspecified
+        std::ranges::sort(order, [](const auto& a, const auto& b) {
+            return a.second != b.second ? a.second > b.second : a.first < b.first;
+        });
+
+        boost::unordered_flat_map<IndexType, IndexType> relabel;
+        relabel.reserve(order.size());
         IndexType next = 0;
-        for (auto& [label, size] : order)
-            relabel[label] = size > minSize ? next++ : std::numeric_limits<IndexType>::max();
+        for (const auto& entry : order)
+            relabel.emplace(entry.first, next++);
 
+        constexpr IndexType dropped = std::numeric_limits<IndexType>::max();
         std::vector<IndexType> out(clusters.size());
-        for (IndexType i = 0; i < clusters.size(); ++i)
-            out[i] = relabel[clusters[i]];
+        for (std::size_t i = 0; i < clusters.size(); ++i) {
+            auto it = relabel.find(clusters[i]);
+            out[i] = it != relabel.end() ? it->second : dropped;
+        }
 
         return out;
     }

@@ -185,8 +185,6 @@ TEST_CASE("symmetrize keeps the strict lower triangle", "[core][symmetrize]") {
     }
 }
 
-// NOTE: sortBySize is not part of graph.hpp and its API was not shown. This test is unchanged
-// from the old version; adjust the name/include if the function was renamed or moved.
 TEST_CASE("sortBySize relabels by descending size", "[core][sort]") {
     // sizes: label 5 -> 4, label 2 -> 3, label 9 -> 1
     const std::vector<IndexType> in = {2, 5, 5, 9, 2, 5, 2, 5};
@@ -196,6 +194,32 @@ TEST_CASE("sortBySize relabels by descending size", "[core][sort]") {
           std::vector<IndexType>{NOT_ASSIGNED, 0, 0, NOT_ASSIGNED, NOT_ASSIGNED, 0, NOT_ASSIGNED, 0});
     CHECK(sortBySize(in, 4) == std::vector<IndexType>(8, NOT_ASSIGNED));
     CHECK(sortBySize({}, 10).empty());
+}
+
+TEST_CASE("sortBySize breaks ties by smallest original label", "[core][sort]") {
+    // sizes: label 7 -> 2, label 3 -> 2, label 8 -> 2, label 1 -> 1
+    // Equal sizes must resolve by ascending label: 3 -> 0, 7 -> 1, 8 -> 2
+    const std::vector<IndexType> in = {7, 3, 8, 7, 3, 8, 1};
+    const std::vector<IndexType> expected = {1, 0, 2, 1, 0, 2, 3};
+    CHECK(sortBySize(in, 0) == expected);
+
+    // Run repeatedly: result must be deterministic regardless of hash iteration order
+    for (int i = 0; i < 10; ++i)
+        CHECK(sortBySize(in, 0) == expected);
+
+    // Strict '>' with ties: all size-2 clusters survive minSize = 1, label 1 (size 1) is dropped
+    CHECK(sortBySize(in, 1) == std::vector<IndexType>{1, 0, 2, 1, 0, 2, NOT_ASSIGNED});
+}
+
+TEST_CASE("sortBySize preserves positions and handles single cluster", "[core][sort]") {
+    // Output is positional: out[i] depends only on in[i]'s cluster
+    const std::vector<IndexType> single(5, 42);
+    CHECK(sortBySize(single, 0) == std::vector<IndexType>(5, 0));
+    CHECK(sortBySize(single, 5) == std::vector<IndexType>(5, NOT_ASSIGNED));
+
+    // Sparse, large labels are handled (no assumption of dense 0..N-1 labels)
+    const std::vector<IndexType> sparse = {1000, 5, 1000, 123456, 1000, 5};
+    CHECK(sortBySize(sparse, 0) == std::vector<IndexType>{0, 1, 0, 2, 0, 1});
 }
 
 TEST_CASE("modularity", "[core][modularity]") {
