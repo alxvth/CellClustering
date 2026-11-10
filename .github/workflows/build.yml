@@ -72,11 +72,6 @@ jobs:
         echo "VCPKG_ROOT=${{ runner.temp }}/vcpkg" >> $env:GITHUB_ENV
         echo "VCPKG_BINARY_SOURCES=clear;files,${{ runner.temp }}/vcpkg-cache,readwrite" >> $env:GITHUB_ENV
 
-    - name: Print binary cache key
-      run: | 
-        echo "vcpkg-cache-${{ runner.os }}-${{ matrix.config.os }}-${{ env.VCPKG_COMMIT_SHA }}-${{ hashFiles('**/vcpkg.json', '**/vcpkg-overlays/**') }}"
-        echo "vcpkg-cache-${{ runner.os }}-${{ matrix.os }}-${{ matrix.build-cversion }}-${{ env.VCPKG_COMMIT_SHA }}-${{ hashFiles('**/vcpkg.json', '**/vcpkg-overlays/**') }}"
-
     - name: Set up binary cache
       uses: actions/cache@v6.1.0
       with:
@@ -149,23 +144,31 @@ jobs:
               -DCELLCLUSTERING_BUILD_EXAMPLES=ON
 
     # Build the project
-    - name: Build (Lib)
+    - name: Build (lib)
       run: |
+        echo "Build lib Release"
         cmake --build ${{github.workspace}}/build --target CellClustering --parallel --config Release
+        echo "Build lib Debug"
         cmake --build ${{github.workspace}}/build --target CellClustering --parallel --config Debug
 
-    - name: Build (Examples)
+    - name: Build (examples)
       run: |
+        echo "Build examples Release"
         cmake --build ${{github.workspace}}/build --target CellClusteringExampleBlobs --parallel --config Release
+        echo "Build examples Debug"
         cmake --build ${{github.workspace}}/build --target CellClusteringExampleBlobs --parallel --config Debug
 
-    - name: Build (Test)
+    - name: Build (test)
       run: |
+        echo "Build test Release"
         cmake --build ${{github.workspace}}/build --target CellClusteringTests --parallel --config Release
+        echo "Build test Debug"
         cmake --build ${{github.workspace}}/build --target CellClusteringTests --parallel --config Debug
 
     # Run tests
     - name: Run tests
       run: |
+        echo "Run tests Release"
         ctest --test-dir ${{github.workspace}}/build --build-config Release --output-on-failure
+        echo "Run tests Debug"
         ctest --test-dir ${{github.workspace}}/build --build-config Debug --output-on-failure
