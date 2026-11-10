@@ -10,7 +10,17 @@ env:
   VCPKG_COMMIT_SHA: 29718cfec805208b4e2d80ed91e681143b488dd7 # corresponds 2026.11.05
   
 jobs:
+  format-check:
+    name: Check clang-format
+    runs-on: ubuntu-26.04
+    steps:
+    - uses: actions/checkout@v7.0.1
+
+    - name: Check formatting
+      run: git ls-files -z -- '*.c' '*.cc' '*.cpp' '*.cxx' '*.h' '*.hh' '*.hpp' '*.hxx' | xargs -0 -r clang-format --dry-run --Werror
+
   build:
+    needs: format-check
     name: ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
     strategy:
