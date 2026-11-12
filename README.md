@@ -41,13 +41,12 @@ cellclustering::Result r = cellclustering::cluster(dataMatrix, opt);
 // r.Q           : modularity
 ```
 
-
 ## Options
 Similar to the options from the Python implementation in [dpeerlab/PhenoGraph](https://github.com/dpeerlab/PhenoGraph):
 
 | `Options` | Default | Notes |
 |---|---|---|
-| `nnMethod` | `HNSW` | `HNSW`, `Annoy`, `KMKNN` (approximate or exact depending on backend), `BruteForce` (exact) |
+| `nnMethod` | `HNSW` | [`HNSW`](https://github.com/nmslib/hnswlib), [`Annoy`](https://github.com/spotify/annoy), [`KMKNN`](https://github.com/knncolle/knncolle_kmknn) (approximate or exact depending on backend), `BruteForce` (exact) |
 | `nnMetric` | `Euclidean` | `Euclidean`, `Manhattan`, `Cosine` |
 | `k` | 30 | number of nearest neighbors (must be >= 1 and smaller than the number of points) |
 | `clusteringAlgo` | `Louvain` | [`Louvain`](https://en.wikipedia.org/wiki/Louvain_method), TODO: implement [`Leiden`](https://en.wikipedia.org/wiki/Leiden_algorithm) |
@@ -64,3 +63,6 @@ Similar to the options from the Python implementation in [dpeerlab/PhenoGraph](h
 | `seed` | none | seeds ANN builds and Louvain restarts |
 | `verbose` | `false` | progress messages on stderr |
 
+## Third-party libraries
+- [boostorg/graph](https://github.com/boostorg/graph) for graph handling, specifically Louvain community detection
+- [knncolle/knncolle](https://github.com/knncolle/knncolle) wraps [`HNSW`](https://github.com/knncolle/knncolle_hnsw), [`Annoy`](https://github.com/knncolle/knncolle_annoy) and [`KMKNN`](https://github.com/knncolle/knncolle_kmknn) nearest neighbor search

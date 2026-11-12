@@ -5,7 +5,8 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#pragma once
+#ifndef CELLCLUSTERING_TYPES_HPP
+#define CELLCLUSTERING_TYPES_HPP
 
 #include <cassert>
 #include <cstdint>
@@ -87,3 +88,5 @@ namespace cellclustering {
     };
 
 } // namespace cellclustering
+
+#endif // CELLCLUSTERING_TYPES_HPP

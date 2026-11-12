@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CELLCLUSTERING_TEST_UTILS_HPP
+#define CELLCLUSTERING_TEST_UTILS_HPP
 
 #include <cstdint>
 #include <map>
@@ -146,3 +147,5 @@ namespace cellclustering::test {
     }
 
 } // namespace cellclustering::test
+
+#endif // CELLCLUSTERING_TEST_UTILS_HPP

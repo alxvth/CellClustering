@@ -5,7 +5,8 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#pragma once
+#ifndef CELLCLUSTERING_LOUVAIN_HPP
+#define CELLCLUSTERING_LOUVAIN_HPP
 
 #include "cellclustering/options.hpp"
 #include "cellclustering/types.hpp"
@@ -20,3 +21,5 @@ namespace cellclustering {
     LouvainResult runLouvain(const BGraph& graph, const Options& opt);
 
 } // namespace cellclustering
+
+#endif // CELLCLUSTERING_LOUVAIN_HPP

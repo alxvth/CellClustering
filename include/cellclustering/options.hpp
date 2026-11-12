@@ -5,7 +5,8 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#pragma once
+#ifndef CELLCLUSTERING_OPTIONS_HPP
+#define CELLCLUSTERING_OPTIONS_HPP
 
 #include <cstdint>
 #include <limits>
@@ -88,3 +89,5 @@ namespace cellclustering {
     void validate(const Options& opt);
 
 } // namespace cellclustering
+
+#endif // CELLCLUSTERING_OPTIONS_HPP

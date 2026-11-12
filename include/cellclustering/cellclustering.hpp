@@ -5,7 +5,8 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#pragma once
+#ifndef CELLCLUSTERING_CELLCLUSTERING_HPP
+#define CELLCLUSTERING_CELLCLUSTERING_HPP
 
 #include "cellclustering/graph.hpp"
 #include "cellclustering/louvain.hpp"
@@ -13,3 +14,5 @@
 #include "cellclustering/options.hpp"
 #include "cellclustering/phenograph.hpp"
 #include "cellclustering/types.hpp"
+
+#endif // CELLCLUSTERING_CELLCLUSTERING_HPP
