@@ -5,7 +5,8 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#pragma once
+#ifndef CELLCLUSTERING_PHENOGRAPH_HPP
+#define CELLCLUSTERING_PHENOGRAPH_HPP
 
 #include "cellclustering/options.hpp"
 #include "cellclustering/types.hpp"
@@ -23,3 +24,5 @@ namespace cellclustering {
     std::vector<IndexType> sortBySize(const std::vector<IndexType>& clusters, const IndexType minSize);
 
 } // namespace cellclustering
+
+#endif // CELLCLUSTERING_PHENOGRAPH_HPP

@@ -5,7 +5,8 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#pragma once
+#ifndef CELLCLUSTERING_GRAPH_HPP
+#define CELLCLUSTERING_GRAPH_HPP
 
 #include "cellclustering/types.hpp"
 
@@ -24,3 +25,5 @@ namespace cellclustering {
     BGraph symmetrize(const BGraph& graph, bool prune);
 
 } // namespace cellclustering
+
+#endif // __CELLCLUSTERING_GRAPH_HPP

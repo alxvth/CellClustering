@@ -5,7 +5,8 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#pragma once
+#ifndef CELLCLUSTERING_KNN_EXTENSION_HPP
+#define CELLCLUSTERING_KNN_EXTENSION_HPP
 
 #include <cmath>
 #include <cstring>
@@ -134,3 +135,5 @@ namespace knncolle_hnsw {
     }
 
 } // namespace knncolle_hnsw
+
+#endif // CELLCLUSTERING_KNN_EXTENSION_HPP

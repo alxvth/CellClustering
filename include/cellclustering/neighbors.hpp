@@ -5,7 +5,8 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-#pragma once
+#ifndef CELLCLUSTERING_NEIGHBORS_HPP
+#define CELLCLUSTERING_NEIGHBORS_HPP
 
 #include "cellclustering/options.hpp"
 #include "cellclustering/types.hpp"
@@ -16,3 +17,5 @@ namespace cellclustering {
     KnnResult findNeighbors(const DenseMatrixView& data, const Options& opt);
 
 } // namespace cellclustering
+
+#endif // CELLCLUSTERING_NEIGHBORS_HPP
